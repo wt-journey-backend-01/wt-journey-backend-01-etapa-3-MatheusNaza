@@ -1,4 +1,22 @@
 {
+  "name": "wt-journey-backend-01-etapa-3-matheusnaza",
+  "version": "1.0.0",
+  "description":"",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-2-MatheusNaza.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-MatheusNaza/issues"
+  },
+  "homepage": "https://github.com/wt-journey-backend-01/wt-journey-backend-01-etapa-3-MatheusNaza#readme",
   "dependencies": {
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
