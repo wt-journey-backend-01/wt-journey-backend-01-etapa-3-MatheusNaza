@@ -50,6 +50,6 @@ async function remove(id) {
 }
 
 // Teste de criação
-create({ nome: "Agente C", cargo: "Delegado" })
+create({ nome: "Agente C", cargo: "Delegado",dataDeIncorporacao:new Date()})
   .then((agente) => console.log(agente))  // Exibe o objeto criado
   .catch((erro) => console.log(erro));  // Exibe erro, se houver
