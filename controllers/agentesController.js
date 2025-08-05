@@ -4,7 +4,7 @@ class AgentesController {
 
   async getAll(req, res, next) {
     try {
-      const agentes = await AgentesRepository.findAll();
+      const agentes = await AgentesRepository.getAll();
       res.status(200).json(agentes);
     } catch (error) {
       next(error); // Passa o erro para o middleware de erro
