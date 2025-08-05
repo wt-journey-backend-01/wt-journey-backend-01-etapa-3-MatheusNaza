@@ -3,8 +3,6 @@ const express = require('express');
 const router = express.Router();
 const AgentesController = require('../controllers/agentesController');
 
-// Rota para listar todos os agentes
-router.get('/', AgentesController.getAll);
 
 // Rota para buscar um agente por ID
 router.get('/:id', AgentesController.getById);

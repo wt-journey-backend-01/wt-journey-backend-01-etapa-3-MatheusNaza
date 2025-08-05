@@ -4,15 +4,6 @@ const AgentesRepository = require('../repositories/agentesRepository');
 
 class CasosController {
 
-  async getAll(req, res, next) {
-    try {
-      const casos = await CasosRepository.getAll();
-      res.status(200).json(casos);
-    } catch (error) {
-      next(error); // Passa o erro para o middleware de erro
-    }
-  }
-
   async getById(req, res, next) {
     try {
       const { id } = req.params;
