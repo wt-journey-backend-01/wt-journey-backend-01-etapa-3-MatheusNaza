@@ -1,66 +1,91 @@
-const { v4: uuidv4 } = require('uuid');
-const repository = require('../repositories/casosRepository');
+const CasosRepository = require('../repositories/casosRepository');
+const AgentesRepository = require('../repositories/agentesRepository');
 
-function getAll(req, res) {
-  res.json(repository.findAll());
-}
+class CasosController {
 
-function getById(req, res) {
-  const caso = repository.findById(req.params.id);
-  if (!caso) return res.status(404).json({ error: "Caso não encontrado" });
-  res.json(caso);
-}
-
-function create(req, res) {
-  const { titulo, descricao, status, agente_id } = req.body;
-  if (!titulo || !descricao || !status || !agente_id) {
-    return res.status(400).json({
-      status: 400,
-      message: "Parâmetros inválidos",
-      errors: [{ campo: "Todos os campos são obrigatórios" }]
-    });
+  async getAll(req, res, next) {
+    try {
+      const casos = await CasosRepository.findAll();
+      res.status(200).json(casos);
+    } catch (error) {
+      next(error); // Passa o erro para o middleware de erro
+    }
   }
 
-  if (!["aberto", "solucionado"].includes(status)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Parâmetros inválidos",
-      errors: [{ status: "O campo 'status' pode ser somente 'aberto' ou 'solucionado'" }]
-    });
+  async getById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const caso = await CasosRepository.findById(Number(id));
+
+      if (!caso) {
+        return res.status(404).json({ message: 'Caso não encontrado.' });
+      }
+
+      res.status(200).json(caso);
+    } catch (error) {
+      next(error);
+    }
   }
 
-  const caso = {
-    id: uuidv4(),
-    titulo,
-    descricao,
-    status,
-    agente_id
-  };
+  async create(req, res, next) {
+    try {
+      const dadosCaso = req.body;
 
-  res.status(201).json(repository.create(caso));
+      // Validação: Verifica se o agente associado ao caso realmente existe
+      if (dadosCaso.agente_id) {
+        const agente = await AgentesRepository.findById(dadosCaso.agente_id);
+        if (!agente) {
+          return res.status(400).json({ message: 'O agente especificado não existe.' });
+        }
+      }
+
+      const novoCaso = await CasosRepository.create(dadosCaso);
+      res.status(201).json(novoCaso);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const dadosCaso = req.body;
+
+      // Validação opcional: Se o agente_id está sendo alterado,
+      // verifica se o novo agente existe.
+      if (dadosCaso.agente_id) {
+        const agente = await AgentesRepository.findById(dadosCaso.agente_id);
+        if (!agente) {
+          return res.status(400).json({ message: 'O novo agente especificado para o caso não existe.' });
+        }
+      }
+
+      const casoAtualizado = await CasosRepository.update(Number(id), dadosCaso);
+
+      if (!casoAtualizado) {
+        return res.status(404).json({ message: 'Caso não encontrado para atualização.' });
+      }
+
+      res.status(200).json(casoAtualizado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async remove(req, res, next) {
+    try {
+      const { id } = req.params;
+      const sucesso = await CasosRepository.remove(Number(id));
+
+      if (!sucesso) {
+        return res.status(404).json({ message: 'Caso não encontrado para deleção.' });
+      }
+
+      res.status(204).send(); // Sem conteúdo na resposta
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
-function update(req, res) {
-  const casoExistente = repository.findById(req.params.id);
-  if (!casoExistente) return res.status(404).json({ error: "Caso não encontrado" });
-
-  const novoCaso = { ...req.body, id: req.params.id };
-  res.json(repository.update(req.params.id, novoCaso));
-}
-
-function partialUpdate(req, res) {
-  const caso = repository.findById(req.params.id);
-  if (!caso) return res.status(404).json({ error: "Caso não encontrado" });
-
-  const atualizado = { ...caso, ...req.body };
-  res.json(repository.update(req.params.id, atualizado));
-}
-
-function remove(req, res) {
-  const ok = repository.remove(req.params.id);
-  if (!ok) return res.status(404).json({ error: "Caso não encontrado" });
-
-  res.status(204).send();
-}
-
-module.exports = { getAll, getById, create, update, partialUpdate, remove };
+module.exports = new CasosController();

@@ -1,69 +1,67 @@
-const db = require("../db/db");
+const db = require('../db/db');
 
-async function create(object) {
-  try{
 
-    const created = await db("casos").insert(object,["*"])
+class CasosRepository {
 
-    return created
-
-  }catch(erro){
-    
-    console.log(erro)
-    return false
-
-  }
-}
-
-async function read(id) {
-  try{
-
-    const result = await db("casos").where({id:id})
-    if(!result){
-      return false
+  async findAll() {
+    try {
+      return await db('casos').select('*');
+    } catch (error) {
+      console.error('Erro ao buscar todos os casos:', error);
+      throw new Error('Falha ao buscar casos.');
     }
-
-    return result[0]
-
-  }catch(erro){
-    
-    console.log(erro)
-    return false
-
   }
-}
 
-
-async function update(id,fieldsToUpdate) {
-  try{
-
-    const updated = await db("casos").where({id:id}).update(fieldsToUpdate,["*"])
-    if(!updated){
-      return false
+  async findById(id) {
+    try {
+      const caso = await db('casos').where({ id: id }).first();
+      return caso;
+    } catch (error) {
+      console.error(`Erro ao buscar caso com id ${id}:`, error);
+      throw new Error('Falha ao buscar caso.');
     }
-    return updated[0]
-
-  }catch(erro){
-    
-    console.log(erro)
-    return false
-
   }
-}
 
-async function remove(id) {
-  try{
-
-    const deleted = await db("casos").where({id:id}).del()
-    if(!deleted){
-      return false
+  async create(casoData) {
+    try {
+      const [novoCaso] = await db('casos').insert(casoData).returning('*');
+      return novoCaso;
+    } catch (error) {
+      console.error('Erro ao criar caso:', error);
+      throw new Error('Falha ao criar caso.');
     }
-    return deleted[0]
+  }
 
-  }catch(erro){
-    
-    console.log(erro)
-    return false
 
+  async update(id, fieldsToUpdate) {
+    try {
+      const [casoAtualizado] = await db('casos').where({ id: id }).update(fieldsToUpdate).returning('*');
+      return casoAtualizado;
+    } catch (error)
+    {
+      console.error(`Erro ao atualizar caso com id ${id}:`, error);
+      throw new Error('Falha ao atualizar caso.');
+    }
+  }
+
+  async remove(id) {
+    try {
+      const count = await db('casos').where({ id: id }).del();
+      return count > 0;
+    } catch (error) {
+      console.error(`Erro ao deletar caso com id ${id}:`, error);
+      throw new Error('Falha ao deletar caso.');
+    }
+  }
+
+  async findByAgenteId(agenteId) {
+    try {
+      return await db('casos').where({ agente_id: agenteId }).select('*');
+    } catch (error) {
+      console.error(`Erro ao buscar casos para o agente com id ${agenteId}:`, error);
+      throw new Error('Falha ao buscar casos do agente.');
+    }
   }
 }
+
+module.exports = new CasosRepository();

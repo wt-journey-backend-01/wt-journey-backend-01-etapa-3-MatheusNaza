@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/casosController');
+const Casoscontroller = require('../controllers/casosController');
 
-router.get('/', controller.getAll);
-router.get('/:id', controller.getById);
-router.post('/', controller.create);
-router.put('/:id', controller.update);
-router.patch('/:id', controller.partialUpdate);
-router.delete('/:id', controller.remove);
+router.get('/', Casoscontroller.getAll);
+router.get('/:id', Casoscontroller.getById);
+router.post('/', Casoscontroller.create);
+router.put('/:id', Casoscontroller.update);
+router.patch('/:id', Casoscontroller.partialUpdate);
+router.delete('/:id', Casoscontroller.remove);
 
 module.exports = router;

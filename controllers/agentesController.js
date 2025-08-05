@@ -1,58 +1,71 @@
-const { v4: uuidv4 } = require('uuid');
-const repository = require('../repositories/agentesRepository');
+const AgentesRepository = require('../repositories/agentesRepository');
 
-function getAll(req, res) {
-  res.json(repository.findAll());
-}
+class AgentesController {
 
-function getById(req, res) {
-  const agente = repository.findById(req.params.id);
-  if (!agente) return res.status(404).json({ error: "Agente não encontrado" });
-  res.json(agente);
-}
-
-function create(req, res) {
-  const { nome, dataDeIncorporacao, cargo } = req.body;
-
-  if (!nome || !dataDeIncorporacao || !cargo) {
-    return res.status(400).json({
-      status: 400,
-      message: "Parâmetros inválidos",
-      errors: [{ campo: "Todos os campos são obrigatórios" }]
-    });
+  async getAll(req, res, next) {
+    try {
+      const agentes = await AgentesRepository.findAll();
+      res.status(200).json(agentes);
+    } catch (error) {
+      next(error); // Passa o erro para o middleware de erro
+    }
   }
 
-  const agente = {
-    id: uuidv4(),
-    nome,
-    dataDeIncorporacao,
-    cargo
-  };
+  async getById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const agente = await AgentesRepository.findById(Number(id));
 
-  res.status(201).json(repository.create(agente));
+      if (!agente) {
+        return res.status(404).json({ message: 'Agente não encontrado.' });
+      }
+
+      res.status(200).json(agente);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async create(req, res, next) {
+    try {
+      const novoAgente = await AgentesRepository.create(req.body);
+      res.status(201).json(novoAgente);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const agenteAtualizado = await AgentesRepository.update(Number(id), req.body);
+
+      if (!agenteAtualizado) {
+        return res.status(404).json({ message: 'Agente não encontrado para atualização.' });
+      }
+
+      res.status(200).json(agenteAtualizado);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  async remove(req, res, next) {
+    try {
+      const { id } = req.params;
+      const sucesso = await AgentesRepository.remove(Number(id));
+
+      if (!sucesso) {
+        return res.status(404).json({ message: 'Agente não encontrado para deleção.' });
+      }
+
+      res.status(204).send(); // Sem conteúdo na resposta
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
-function update(req, res) {
-  const agenteExistente = repository.findById(req.params.id);
-  if (!agenteExistente) return res.status(404).json({ error: "Agente não encontrado" });
-
-  const novoAgente = { ...req.body, id: req.params.id };
-  res.json(repository.update(req.params.id, novoAgente));
-}
-
-function partialUpdate(req, res) {
-  const agente = repository.findById(req.params.id);
-  if (!agente) return res.status(404).json({ error: "Agente não encontrado" });
-
-  const atualizado = { ...agente, ...req.body };
-  res.json(repository.update(req.params.id, atualizado));
-}
-
-function remove(req, res) {
-  const ok = repository.remove(req.params.id);
-  if (!ok) return res.status(404).json({ error: "Agente não encontrado" });
-
-  res.status(204).send();
-}
-
-module.exports = { getAll, getById, create, update, partialUpdate, remove };
+module.exports = new AgentesController();
